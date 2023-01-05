@@ -12,6 +12,7 @@ class PhoneNumberPage extends StatefulWidget {
 
 class _PhoneNumberPageState extends State<PhoneNumberPage>{
   TextEditingController phoneCtrl = TextEditingController();
+  TextEditingController passCtrl = TextEditingController();
   String phoneNumber = "";
   @override
   Widget build(BuildContext context) {
@@ -40,10 +41,10 @@ class _PhoneNumberPageState extends State<PhoneNumberPage>{
                             )),
                         TextButton(
                           onPressed: () {
-
+                            Navigator.pushNamed(context, Routes.signup);
                           },
                           child: Text(
-                            "Tiếp tục",
+                            "Đăng ký",
                             style: TextStyle(
                                 color: AppTheme.white,
                                 fontSize: 17.0,
@@ -73,7 +74,7 @@ class _PhoneNumberPageState extends State<PhoneNumberPage>{
                         Container(
                           margin: const EdgeInsets.only(top: 16.0),
                           child: Text(
-                            "Nhập số diện thoại của bạn để tiến hành đăng nhập",
+                            "Nhập số diện thoại và mật khẩu của bạn để tiến hành đăng nhập",
                             style: TextStyle(
                                 color: AppTheme.white, fontSize: 16.0),
                             textAlign: TextAlign.center,
@@ -88,23 +89,23 @@ class _PhoneNumberPageState extends State<PhoneNumberPage>{
                     child: Column(
                       children: [
                         Container(
-                          decoration: const BoxDecoration(
-                              border: Border(
-                                  bottom: BorderSide(
-                                      color:
-                                      Color.fromRGBO(84, 84, 88, 0.85),
-                                      width: 0.33),
-                                  top: BorderSide(
-                                      color:
-                                      Color.fromRGBO(84, 84, 88, 0.85),
-                                      width: 0.33))),
+                          // decoration: const BoxDecoration(
+                          //     border: Border(
+                          //         bottom: BorderSide(
+                          //             color:
+                          //             Color.fromRGBO(84, 84, 88, 0.85),
+                          //             width: 0.33),
+                          //         top: BorderSide(
+                          //             color:
+                          //             Color.fromRGBO(84, 84, 88, 0.85),
+                          //             width: 0.33))),
                           height: 56,
                           padding:
                           const EdgeInsets.symmetric(horizontal: 20.0),
                           child: Row(
                             children: [
                               Text(
-                                "Vietnam",
+                                "Số điện thoại",
                                 style: TextStyle(
                                     color: AppTheme.white, fontSize: 20.0),
                               )
@@ -114,6 +115,10 @@ class _PhoneNumberPageState extends State<PhoneNumberPage>{
                         Container(
                           decoration: const BoxDecoration(
                               border: Border(
+                                top: BorderSide(
+                                              color:
+                                              Color.fromRGBO(84, 84, 88, 0.85),
+                                              width: 0.33),
                                   bottom: BorderSide(
                                       color:
                                       Color.fromRGBO(84, 84, 88, 0.85),
@@ -160,6 +165,60 @@ class _PhoneNumberPageState extends State<PhoneNumberPage>{
                                             fontSize: 22.0,
                                             color: Color.fromRGBO(
                                                 235, 235, 245, 0.3))),
+                                  ))
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Container(
+                    margin:
+                    const EdgeInsets.only(top: 44.0, left: 36.0, right: 20.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          "Mật khẩu",
+                          style: TextStyle(
+                              color: AppTheme.white, fontSize: 20.0),
+                        ),
+                        SizedBox(height: 10,),
+                        Container(
+                          decoration: const BoxDecoration(
+                              border: Border(
+                                  bottom: BorderSide(
+                                      color: Color.fromRGBO(84, 84, 88, 0.85),
+                                      width: 0.33),
+                                  top: BorderSide(
+                                      color: Color.fromRGBO(84, 84, 88, 0.85),
+                                      width: 0.33))),
+                          height: 56,
+                          padding: const EdgeInsets.only(right: 24),
+                          child: Row(
+                            children: [
+                              Flexible(
+                                  child: TextField(
+                                    controller: passCtrl,
+                                    obscureText: true,
+                                    onChanged: (text) {
+                                      // setState(() {
+                                      //   pass = text;
+                                      // });
+                                    },
+                                    autocorrect: false,
+                                    autofocus: true,
+                                    cursorColor: Colors.white,
+                                    textAlignVertical: TextAlignVertical.center,
+                                    style: TextStyle(
+                                        fontSize: 22.0, color: AppTheme.white),
+                                    decoration: const InputDecoration(
+                                        border: InputBorder.none,
+                                        hintText: "Mật khẩu",
+                                        hintStyle: TextStyle(
+                                            fontSize: 22.0,
+                                            color:
+                                            Color.fromRGBO(235, 235, 245, 0.3))),
                                   ))
                             ],
                           ),

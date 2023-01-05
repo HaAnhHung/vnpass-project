@@ -6,4 +6,6 @@ class Routes {
   static const card = '/card';
   static const login = '/login';
   static const checkPhone = '/check-phone';
+  static const signup = '/sign-up';
+  static const otp = '/otp';
 }

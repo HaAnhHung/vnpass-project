@@ -4,6 +4,8 @@ import 'package:vnpass/screen/card/card_page.dart';
 import 'package:vnpass/screen/home/home_page.dart';
 import 'package:vnpass/screen/login/check_phone_number.dart';
 import 'package:vnpass/screen/login/login_page.dart';
+import 'package:vnpass/screen/login/otp.dart';
+import 'package:vnpass/screen/login/sign_up.dart';
 import 'package:vnpass/screen/profile/account_page.dart';
 import 'package:vnpass/screen/profile/profile_page.dart';
 import 'package:vnpass/screen/recharge_money/recharge_page.dart';
@@ -30,6 +32,8 @@ class _AppContainerState extends State<AppContainer>{
         Routes.card: (context) => const CardPage(),
         Routes.login: (context) => const LoginPage(),
         Routes.checkPhone: (context) => const PhoneNumberPage(),
+        Routes.signup: (context) => const SignupPage(),
+        Routes.otp: (context) => const OTPPage(),
       },
     );
   }
