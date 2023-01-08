@@ -23,7 +23,7 @@ class _AppContainerState extends State<AppContainer>{
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      initialRoute: Routes.home,
+      initialRoute: Routes.checkPhone,
       routes: {
         Routes.home: (context) => const HomePage(),
         Routes.recharge: (context) => const RechargePage(),

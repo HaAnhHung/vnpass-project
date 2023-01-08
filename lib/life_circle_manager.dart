@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:vnpass/app_container.dart';
 import 'package:vnpass/bloc/account/account_bloc.dart';
+import 'package:vnpass/bloc/auth/auth_bloc.dart';
 import 'package:vnpass/bloc/card/card_bloc.dart';
 import 'package:vnpass/bloc/home/home_bloc.dart';
 import 'package:vnpass/bloc/recharge_money/recharge_bloc.dart';
@@ -30,6 +31,9 @@ class _LifeCircleManagerState extends State<LifeCircleManager>{
         ),
         BlocProvider<AccountBloc>(
           create: (context) => AccountBloc(),
+        ),
+        BlocProvider<AuthBloc>(
+          create: (context) => AuthBloc(),
         ),
       ],
         child: const AppContainer(),
