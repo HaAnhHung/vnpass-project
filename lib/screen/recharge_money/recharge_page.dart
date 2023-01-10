@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:vnpass/bloc/recharge_money/recharge_bloc.dart';
+import 'package:vnpass/bloc/wallet/wallet_bloc.dart';
 import 'package:vnpass/screen/recharge_money/format_money.dart';
 import 'package:vnpass/screen/utils/money_format.dart';
 import 'package:vnpass/theme/colors.dart';
@@ -17,11 +18,13 @@ class _RechargePageState extends State<RechargePage>{
   FocusNode rechargeFocusNode = FocusNode();
   TextEditingController rechargeController = TextEditingController();
   RechargeBLoc? rechargeBLoc;
+  WalletBloc walletBloc = WalletBloc();
 
   @override
   void initState() {
     super.initState();
     rechargeBLoc = BlocProvider.of<RechargeBLoc>(context);
+    walletBloc = BlocProvider.of<WalletBloc>(context);
   }
 
   @override
@@ -78,9 +81,9 @@ class _RechargePageState extends State<RechargePage>{
                               children: [
                                 Row(
                                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                  children: const [
+                                  children: [
                                     Text("Số dư ví", style: TextStyle(fontSize: 15, fontWeight: FontWeight.w400),),
-                                    Text("2.000.000 đ", style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600),)
+                                    Text((walletBloc.wallet?.balance.toString() ?? "0") + " đ", style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600),)
                                   ],
                                 ),
                                 const SizedBox(height: 15,),

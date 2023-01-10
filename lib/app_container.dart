@@ -1,13 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:vnpass/routes.dart';
 import 'package:vnpass/screen/card/card_page.dart';
+import 'package:vnpass/screen/card/pass_wallet.dart';
 import 'package:vnpass/screen/home/home_page.dart';
 import 'package:vnpass/screen/login/check_phone_number.dart';
 import 'package:vnpass/screen/login/login_page.dart';
 import 'package:vnpass/screen/login/otp.dart';
 import 'package:vnpass/screen/login/sign_up.dart';
 import 'package:vnpass/screen/profile/account_page.dart';
+import 'package:vnpass/screen/profile/change_password_page.dart';
+import 'package:vnpass/screen/profile/new_password.dart';
+import 'package:vnpass/screen/profile/otp_reset_password.dart';
 import 'package:vnpass/screen/profile/profile_page.dart';
+import 'package:vnpass/screen/profile/reset_password.dart';
 import 'package:vnpass/screen/recharge_money/recharge_page.dart';
 
 class AppContainer extends StatefulWidget {
@@ -34,6 +39,11 @@ class _AppContainerState extends State<AppContainer>{
         Routes.checkPhone: (context) => const PhoneNumberPage(),
         Routes.signup: (context) => const SignupPage(),
         Routes.otp: (context) => const OTPPage(),
+        Routes.changePassword: (context) => const ChangePasswordPage(),
+        Routes.resetPassword: (context) => const ResetPasswordPage(),
+        Routes.OTPResetPassword: (context) => const OTPResetPassPage(),
+        Routes.newPassword: (context) => const NewPasswordPage(),
+        Routes.walletPass: (context) => const WalletPassPage(),
       },
     );
   }

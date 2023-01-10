@@ -17,11 +17,25 @@ class SendOTPEvent extends AccountEvent {}
 
 class ConfirmOTPEvent extends AccountEvent {}
 
-class CheckOldPassEvent extends AccountEvent {}
+class ChangePasswordEvent extends AccountEvent {
+  final String oldPassword;
+  final String newPassword;
+  final String confirmNewPassword;
 
-class ConfirmNewPassEvent extends AccountEvent {
-  final String newPass;
-  final String confirmPass;
+  ChangePasswordEvent(this.oldPassword, this.newPassword, this.confirmNewPassword);
+}
 
-  ConfirmNewPassEvent(this.newPass, this.confirmPass);
+class SendOTPToResetPassEvent extends AccountEvent {
+  final String phone;
+
+  SendOTPToResetPassEvent(this.phone);
+}
+
+class ResetPasswordEvent extends AccountEvent {
+  final String phone;
+  final String password;
+  final String confirmPassword;
+  final String otp;
+
+  ResetPasswordEvent(this.phone, this.password, this.otp, this.confirmPassword);
 }

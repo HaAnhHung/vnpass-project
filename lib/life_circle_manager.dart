@@ -6,6 +6,7 @@ import 'package:vnpass/bloc/auth/auth_bloc.dart';
 import 'package:vnpass/bloc/card/card_bloc.dart';
 import 'package:vnpass/bloc/home/home_bloc.dart';
 import 'package:vnpass/bloc/recharge_money/recharge_bloc.dart';
+import 'package:vnpass/bloc/wallet/wallet_bloc.dart';
 
 class LifeCircleManager extends StatefulWidget {
   const LifeCircleManager({Key? key}) : super(key: key);
@@ -34,6 +35,9 @@ class _LifeCircleManagerState extends State<LifeCircleManager>{
         ),
         BlocProvider<AuthBloc>(
           create: (context) => AuthBloc(),
+        ),
+        BlocProvider<WalletBloc>(
+          create: (context) => WalletBloc(),
         ),
       ],
         child: const AppContainer(),

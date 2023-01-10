@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:pinput/pinput.dart';
 import 'package:vnpass/bloc/account/account_bloc.dart';
 import 'package:vnpass/bloc/account/account_event.dart';
 import 'package:vnpass/bloc/account/account_state.dart';
+import 'package:vnpass/bloc/auth/auth_bloc.dart';
 import 'package:vnpass/routes.dart';
 import 'package:vnpass/theme/app_icon.dart';
 import 'package:vnpass/theme/colors.dart';
@@ -18,6 +18,7 @@ class AccountPage extends StatefulWidget {
 
 class _AccountPageState extends State<AccountPage> {
   AccountBloc accountBloc = AccountBloc();
+  AuthBloc authBloc = AuthBloc();
   TextEditingController changePassController = TextEditingController();
   TextEditingController newPassController = TextEditingController();
   TextEditingController confirmNewPassController = TextEditingController();
@@ -29,6 +30,7 @@ class _AccountPageState extends State<AccountPage> {
   void initState() {
     super.initState();
     accountBloc = BlocProvider.of<AccountBloc>(context);
+    authBloc = BlocProvider.of<AuthBloc>(context);
   }
 
   @override
@@ -76,19 +78,33 @@ class _AccountPageState extends State<AccountPage> {
                   ),
                   Column(
                     children: [
-                      Text(
-                        "Hà Anh Hùng",
-                        style: TextStyle(
-                            fontSize: 16, fontWeight: FontWeight.w600, color: AppTheme.white),
-                      ),
+                      if (authBloc.customer!.name.isNotEmpty)
+                        Text(
+                          authBloc.customer?.name ?? "...",
+                          style: TextStyle(
+                              fontSize: 16, fontWeight: FontWeight.w600, color: AppTheme.white),
+                        )
+                      else
+                        Text(
+                          "...",
+                          style: TextStyle(
+                              fontSize: 16, fontWeight: FontWeight.w600, color: AppTheme.white),
+                        ),
                       const SizedBox(
                         height: 5,
                       ),
-                      Text(
-                        "0398290722",
-                        style: TextStyle(
-                            fontSize: 14, fontWeight: FontWeight.w400, color: AppTheme.grey1),
-                      )
+                      if (authBloc.customer!.phone.isNotEmpty)
+                        Text(
+                          authBloc.customer?.phone ?? "...",
+                          style: TextStyle(
+                              fontSize: 14, fontWeight: FontWeight.w400, color: AppTheme.grey1),
+                        )
+                      else
+                        Text(
+                          "...",
+                          style: TextStyle(
+                              fontSize: 14, fontWeight: FontWeight.w400, color: AppTheme.grey1),
+                        )
                     ],
                   )
                 ],
@@ -132,7 +148,8 @@ class _AccountPageState extends State<AccountPage> {
               color: AppTheme.white,
               child: TextButton(
                 onPressed: () {
-                  onPressForgotPass();
+                  // onPressForgotPass();
+                  Navigator.pushNamed(context, Routes.resetPassword);
                 },
                 style: TextButton.styleFrom(
                     backgroundColor: AppTheme.white,
@@ -163,7 +180,8 @@ class _AccountPageState extends State<AccountPage> {
               color: AppTheme.white,
               child: TextButton(
                 onPressed: () {
-                  onPressChangePass();
+                  // onPressChangePass();
+                  Navigator.pushNamed(context, Routes.changePassword);
                 },
                 style: TextButton.styleFrom(
                     backgroundColor: AppTheme.white,
@@ -304,12 +322,12 @@ class _AccountPageState extends State<AccountPage> {
               ),
               if (!accountBloc.sentOTP)
                 TextField(
-                keyboardType: TextInputType.number,
-                decoration: InputDecoration(
-                  isDense: true,
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
-                ),
-              )
+                  keyboardType: TextInputType.number,
+                  decoration: InputDecoration(
+                    isDense: true,
+                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+                  ),
+                )
               else
                 Pinput(
                   length: 6,
@@ -320,9 +338,7 @@ class _AccountPageState extends State<AccountPage> {
                       margin: EdgeInsets.only(right: 10),
                       decoration: BoxDecoration(
                           border: Border.all(color: AppTheme.grey2),
-                          borderRadius: BorderRadius.circular(10)
-                      )
-                  ),
+                          borderRadius: BorderRadius.circular(10))),
                   focusedPinTheme: PinTheme(
                       height: 40,
                       textStyle: TextStyle(fontSize: 19, fontWeight: FontWeight.w500),
@@ -330,9 +346,7 @@ class _AccountPageState extends State<AccountPage> {
                       margin: EdgeInsets.only(right: 10),
                       decoration: BoxDecoration(
                           border: Border.all(color: AppTheme.greenApp2),
-                        borderRadius: BorderRadius.circular(10)
-                      )
-                  ),
+                          borderRadius: BorderRadius.circular(10))),
                   submittedPinTheme: PinTheme(
                       height: 40,
                       textStyle: TextStyle(fontSize: 19, fontWeight: FontWeight.w500),
@@ -340,9 +354,7 @@ class _AccountPageState extends State<AccountPage> {
                       margin: EdgeInsets.only(right: 10),
                       decoration: BoxDecoration(
                           border: Border.all(color: AppTheme.greenApp2),
-                          borderRadius: BorderRadius.circular(10)
-                      )
-                  ),
+                          borderRadius: BorderRadius.circular(10))),
                 ),
               const SizedBox(
                 height: 30,
@@ -388,134 +400,118 @@ class _AccountPageState extends State<AccountPage> {
     );
   }
 
-  void onPressChangePass() {
-    showModalBottomSheet(
-        context: context,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.only(topLeft: Radius.circular(20), topRight: Radius.circular(20))
-        ),
-        builder: (context) => BlocConsumer<AccountBloc, AccountState>(
-          listener: (context, state) {
-            if (state is CheckOldPassSuccessState) {
-              accountBloc.emit(AccountInitialState());
-            } else if (state is ConfirmNewPassSuccessState) {
-              Fluttertoast.showToast(msg: "Đổi mật khẩu thành công", toastLength: Toast.LENGTH_LONG, gravity: ToastGravity.CENTER);
-              Navigator.pop(context);
-              newPassController.clear();
-              confirmNewPassController.clear();
-              accountBloc.emit(AccountInitialState());
-            } else if (state is ConfirmNewPassFailState) {
-              Fluttertoast.showToast(msg: "Mật khẩu nhập lại không trùng khớp", toastLength: Toast.LENGTH_LONG, gravity: ToastGravity.CENTER);
-            }
-          },
-          builder: (context, state) => GestureDetector(
-            onTap: () {
-              changePassFocusNode.unfocus();
-              newPassFocusNode.unfocus();
-              confirmNewPassFocusNode.unfocus();
-            },
-            child: Container(
-              decoration: BoxDecoration(
-                color: AppTheme.white,
-                borderRadius: BorderRadius.only(topRight: Radius.circular(20), topLeft: Radius.circular(20))
-              ),
-              padding: EdgeInsets.only(top: 20, bottom: 20, left: 20, right: 20),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  if (!accountBloc.checkOldPass)
-                    Text("Nhập mật khẩu cũ", style: TextStyle(fontSize: 19, fontWeight: FontWeight.w500),)
-                  else
-                    Text("Mật khẩu mới", style: TextStyle(fontSize: 19, fontWeight: FontWeight.w500),),
-                  SizedBox(height: 20,),
-                  if (!accountBloc.checkOldPass)
-                    TextField(
-                    focusNode: changePassFocusNode,
-                    controller: changePassController,
-                    decoration: InputDecoration(
-                      isDense: true,
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(10),
-                      )
-                    ),
-                  )
-                  else
-                    Column(
-                      children: [
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text("Mật khẩu mới", style: TextStyle(fontSize: 14, fontWeight: FontWeight.w400),),
-                            SizedBox(height: 10,),
-                            TextField(
-                              focusNode: newPassFocusNode,
-                              controller: newPassController,
-                              decoration: InputDecoration(
-                                  isDense: true,
-                                  border: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(10),
-                                  )
-                              ),
-                            ),
-                          ]
-                        ),
-                        SizedBox(height: 15,),
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text("Nhập lại mật khẩu mới", style: TextStyle(fontSize: 14, fontWeight: FontWeight.w400),),
-                            SizedBox(height: 10,),
-                            TextField(
-                              focusNode: confirmNewPassFocusNode,
-                              controller: confirmNewPassController,
-                              decoration: InputDecoration(
-                                  isDense: true,
-                                  border: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(10),
-                                  )
-                              ),
-                            )
-                          ],
-                        )
-                      ],
-                    ),
-                  SizedBox(height: 20,),
-                  if (!accountBloc.checkOldPass)
-                    SizedBox(
-                    width: MediaQuery.of(context).size.width,
-                    child: ElevatedButton(
-                        onPressed: () {
-                          onPressCheckOldPass();
-                        },
-                      style: ElevatedButton.styleFrom(primary: AppTheme.greenApp2, padding: EdgeInsets.only(top: 15, bottom: 15)),
-                        child: Text("Xác nhận", style: TextStyle(fontSize: 19, fontWeight: FontWeight.w500),),
-                    ),
-                  )
-                  else
-                    SizedBox(
-                      width: MediaQuery.of(context).size.width,
-                      child: ElevatedButton(
-                        onPressed: () {
-                          onPressConfirmNewPass();
-                        },
-                        style: ElevatedButton.styleFrom(primary: AppTheme.greenApp2, padding: EdgeInsets.only(top: 15, bottom: 15)),
-                        child: Text("Đổi mật khẩu", style: TextStyle(fontSize: 19, fontWeight: FontWeight.w500),),
-                      ),
-                    ),
-                  SizedBox(height: MediaQuery.of(context).padding.bottom),
-                ],
-              ),
-            ),
-          ),
-        ),
-    );
-  }
-
-  void onPressCheckOldPass() {
-    accountBloc.add(CheckOldPassEvent());
-  }
-
-  void onPressConfirmNewPass() {
-    accountBloc.add(ConfirmNewPassEvent(newPassController.text, confirmNewPassController.text));
-  }
+// void onPressChangePass() {
+//   showModalBottomSheet(
+//       context: context,
+//       shape: RoundedRectangleBorder(
+//         borderRadius: BorderRadius.only(topLeft: Radius.circular(20), topRight: Radius.circular(20))
+//       ),
+//       builder: (context) => BlocConsumer<AccountBloc, AccountState>(
+//         listener: (context, state) {
+//           if (state is CheckOldPassSuccessState) {
+//             accountBloc.emit(AccountInitialState());
+//           }
+//         },
+//         builder: (context, state) => GestureDetector(
+//           onTap: () {
+//             changePassFocusNode.unfocus();
+//             newPassFocusNode.unfocus();
+//             confirmNewPassFocusNode.unfocus();
+//           },
+//           child: Container(
+//             decoration: BoxDecoration(
+//               color: AppTheme.white,
+//               borderRadius: BorderRadius.only(topRight: Radius.circular(20), topLeft: Radius.circular(20))
+//             ),
+//             padding: EdgeInsets.only(top: 20, bottom: 20, left: 20, right: 20),
+//             child: Column(
+//               mainAxisSize: MainAxisSize.min,
+//               children: [
+//                 if (!accountBloc.checkOldPass)
+//                   Text("Nhập mật khẩu cũ", style: TextStyle(fontSize: 19, fontWeight: FontWeight.w500),)
+//                 else
+//                   Text("Mật khẩu mới", style: TextStyle(fontSize: 19, fontWeight: FontWeight.w500),),
+//                 SizedBox(height: 20,),
+//                 if (!accountBloc.checkOldPass)
+//                   TextField(
+//                   focusNode: changePassFocusNode,
+//                   controller: changePassController,
+//                   decoration: InputDecoration(
+//                     isDense: true,
+//                     border: OutlineInputBorder(
+//                       borderRadius: BorderRadius.circular(10),
+//                     )
+//                   ),
+//                 )
+//                 else
+//                   Column(
+//                     children: [
+//                       Column(
+//                         crossAxisAlignment: CrossAxisAlignment.start,
+//                         children: [
+//                           Text("Mật khẩu mới", style: TextStyle(fontSize: 14, fontWeight: FontWeight.w400),),
+//                           SizedBox(height: 10,),
+//                           TextField(
+//                             focusNode: newPassFocusNode,
+//                             controller: newPassController,
+//                             decoration: InputDecoration(
+//                                 isDense: true,
+//                                 border: OutlineInputBorder(
+//                                   borderRadius: BorderRadius.circular(10),
+//                                 )
+//                             ),
+//                           ),
+//                         ]
+//                       ),
+//                       SizedBox(height: 15,),
+//                       Column(
+//                         crossAxisAlignment: CrossAxisAlignment.start,
+//                         children: [
+//                           Text("Nhập lại mật khẩu mới", style: TextStyle(fontSize: 14, fontWeight: FontWeight.w400),),
+//                           SizedBox(height: 10,),
+//                           TextField(
+//                             focusNode: confirmNewPassFocusNode,
+//                             controller: confirmNewPassController,
+//                             decoration: InputDecoration(
+//                                 isDense: true,
+//                                 border: OutlineInputBorder(
+//                                   borderRadius: BorderRadius.circular(10),
+//                                 )
+//                             ),
+//                           )
+//                         ],
+//                       )
+//                     ],
+//                   ),
+//                 SizedBox(height: 20,),
+//                 if (!accountBloc.checkOldPass)
+//                   SizedBox(
+//                   width: MediaQuery.of(context).size.width,
+//                   child: ElevatedButton(
+//                       onPressed: () {
+//                         onPressCheckOldPass();
+//                       },
+//                     style: ElevatedButton.styleFrom(primary: AppTheme.greenApp2, padding: EdgeInsets.only(top: 15, bottom: 15)),
+//                       child: Text("Xác nhận", style: TextStyle(fontSize: 19, fontWeight: FontWeight.w500),),
+//                   ),
+//                 )
+//                 else
+//                   SizedBox(
+//                     width: MediaQuery.of(context).size.width,
+//                     child: ElevatedButton(
+//                       onPressed: () {
+//                         onPressConfirmNewPass();
+//                       },
+//                       style: ElevatedButton.styleFrom(primary: AppTheme.greenApp2, padding: EdgeInsets.only(top: 15, bottom: 15)),
+//                       child: Text("Đổi mật khẩu", style: TextStyle(fontSize: 19, fontWeight: FontWeight.w500),),
+//                     ),
+//                   ),
+//                 SizedBox(height: MediaQuery.of(context).padding.bottom),
+//               ],
+//             ),
+//           ),
+//         ),
+//       ),
+//   );
+// }
 }

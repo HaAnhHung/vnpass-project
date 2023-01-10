@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:pinput/pinput.dart';
 import 'package:vnpass/bloc/card/card_bloc.dart';
 import 'package:vnpass/bloc/card/card_state.dart';
+import 'package:vnpass/bloc/wallet/wallet_bloc.dart';
 import 'package:vnpass/theme/app_icon.dart';
 import 'package:vnpass/theme/colors.dart';
 
@@ -17,12 +18,14 @@ class CardPage extends StatefulWidget {
 
 class _CardPageState extends State<CardPage>{
   CardBloc? cardBloc;
+  WalletBloc walletBloc = WalletBloc();
   TextEditingController pinputController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
     cardBloc = BlocProvider.of<CardBloc>(context);
+    walletBloc = BlocProvider.of<WalletBloc>(context);
   }
   @override
   Widget build(BuildContext context) {
@@ -36,6 +39,7 @@ class _CardPageState extends State<CardPage>{
         appBar: AppBar(
           backgroundColor: AppTheme.greenApp2,
           elevation: 0,
+          centerTitle: true,
           iconTheme: IconThemeData(color: AppTheme.white, size: 20),
           title: Text("Quản lí thẻ", style: TextStyle(fontSize: 19, fontWeight: FontWeight.w500, color: AppTheme.white),),
         ),
@@ -71,7 +75,7 @@ class _CardPageState extends State<CardPage>{
                         children: [
                           Text("Số dư:", style: TextStyle(fontSize: 15, fontWeight: FontWeight.w400, color: AppTheme.white),),
                           const SizedBox(height: 5,),
-                          Text("2.000.000", style: TextStyle(fontSize: 25, fontWeight: FontWeight.w600, color: AppTheme.white),)
+                          Text((walletBloc.wallet?.balance.toString() ?? "...") + " đ", style: TextStyle(fontSize: 25, fontWeight: FontWeight.w600, color: AppTheme.white),)
                         ],
                       ),
                       const SizedBox(height: 20,),
@@ -80,7 +84,7 @@ class _CardPageState extends State<CardPage>{
                         children: [
                           Text("Số thẻ:", style: TextStyle(fontSize: 15, fontWeight: FontWeight.w400, color: AppTheme.white),),
                           const SizedBox(height: 5,),
-                          Text("1234 5678 9012 34", style: TextStyle(fontSize: 17, fontWeight: FontWeight.w500, color: AppTheme.white),)
+                          Text(walletBloc.wallet?.code ?? "...", style: TextStyle(fontSize: 17, fontWeight: FontWeight.w500, color: AppTheme.white),)
                         ],
                       )
                     ],

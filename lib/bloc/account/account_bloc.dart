@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:vnpass/api/change_password.dart';
+import 'package:vnpass/api/request_reset_password.dart';
+import 'package:vnpass/api/reset_password.dart';
 import 'package:vnpass/bloc/account/account_event.dart';
 import 'package:vnpass/bloc/account/account_state.dart';
 import 'package:vnpass/theme/colors.dart';
@@ -11,6 +14,8 @@ class AccountBloc extends Bloc<AccountEvent, AccountState> {
   String fileImage = "";
   bool sentOTP = false;
   bool checkOldPass = false;
+  String otpResetPassword = "000000";
+  String phoneResetPassword = "";
   AccountBloc() : super(AccountInitialState()){
     on<ShowDialogUpdateAvatarEvent>((event, emit) {
       showDialogUpdateAvatar(event.context);
@@ -23,18 +28,61 @@ class AccountBloc extends Bloc<AccountEvent, AccountState> {
       sentOTP = !sentOTP;
       emit(ConfirmOTPSuccessState());
     });
-    on<CheckOldPassEvent>((event, emit) {
-      checkOldPass = !checkOldPass;
-      emit(CheckOldPassSuccessState());
+    on<ChangePasswordEvent>((event, emit) {
+      onPressChangePass(event.oldPassword, event.newPassword, event.confirmNewPassword);
     });
-    on<ConfirmNewPassEvent>((event, emit) {
-      checkOldPass = !checkOldPass;
-      if (event.newPass.compareTo(event.confirmPass) == 0) {
-        emit(ConfirmNewPassSuccessState());
-      } else {
-        emit(ConfirmNewPassFailState());
+    on<SendOTPToResetPassEvent>((event, emit) {
+      onPressRequestResetPass(event.phone);
+    });
+    on<ResetPasswordEvent>((event, emit) {
+      onPressResetPassword(event.phone, event.password, event.confirmPassword, event.otp);
+    });
+  }
+
+  void onPressResetPassword(String phone, String password, String confirmPassword, String otp) async {
+    bool checkPass() {
+      if (password.length < 6) {
+        Fluttertoast.showToast(msg: "Mật khẩu phải có ít nhất 6 kí tự", toastLength: Toast.LENGTH_LONG, gravity: ToastGravity.CENTER);
+        return false;
+      } else if (password.compareTo(confirmPassword) != 0) {
+        Fluttertoast.showToast(msg: "Mật khẩu nhập lại không trùng khớp", toastLength: Toast.LENGTH_LONG, gravity: ToastGravity.CENTER);
+        return false;
       }
-    });
+      return true;
+    }
+    if (checkPass()) {
+      emit(ResettingPasswordState());
+      var data = await resetPassword(phone, password, otp);
+      if (data.success && data.code.contains("SUCCESS")) {
+        emit(ResetPasswordSuccessState());
+      } else {
+        emit(ResetPasswordFailState(data.message ?? ""));
+      }
+    }
+  }
+
+  void onPressRequestResetPass(String phone) async {
+    emit(SendingOTPTOResetPassState());
+    var data = await requestResetPassword(phone);
+    if (data.success && data.code.contains("SUCCESS")){
+      emit(SendOTPTOResetPassSuccessState());
+    } else {
+      emit(SendOTPTOResetPassFailState(data.message ?? ""));
+    }
+  }
+
+  void onPressChangePass(String oldPassword, String newPassword, String confirmNewPass) async {
+    emit(ChangingPassState());
+    if (newPassword.compareTo(confirmNewPass) == 0) {
+      var data = await changePassword(oldPassword, newPassword);
+      if (data.success && data.code.contains("SUCCESS")) {
+        emit(ChangePassSuccessState());
+      } else {
+        emit(ChangePassFailState(data.message ?? ""));
+      }
+    } else {
+      emit(ChangePassFailState("Mật khẩu nhập lại không trùng khớp"));
+    }
   }
 
   void showDialogUpdateAvatar(BuildContext context) {

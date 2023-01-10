@@ -9,4 +9,8 @@ class Endpoints {
   static String activate = prefix + '/auth/activate';
   static String resendOtp = prefix + '/auth/activate/resend-otp';
   static String changePassword = prefix + '/auth/password';
+  static String requestResetPass = prefix + '/auth/password/request-reset';
+  static String resetPassword = prefix + '/auth/password/reset';
+  static String getWallet = prefix + '/wallet';
+  static String walletPassword = prefix + '/wallet/password';
 }

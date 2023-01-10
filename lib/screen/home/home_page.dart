@@ -1,14 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:vnpass/bloc/account/account_bloc.dart';
+import 'package:vnpass/bloc/auth/auth_bloc.dart';
 import 'package:vnpass/bloc/home/home_bloc.dart';
 import 'package:vnpass/bloc/home/home_event.dart';
 import 'package:vnpass/bloc/home/home_state.dart';
+import 'package:vnpass/bloc/wallet/wallet_bloc.dart';
+import 'package:vnpass/bloc/wallet/wallet_event.dart';
+import 'package:vnpass/bloc/wallet/wallet_state.dart';
 import 'package:vnpass/routes.dart';
 import 'package:vnpass/screen/card/card_page.dart';
 import 'package:vnpass/screen/profile/profile_page.dart';
 import 'package:vnpass/theme/app_icon.dart';
 import 'package:vnpass/theme/colors.dart';
+import 'package:vnpass/widget/dialog.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);
@@ -20,6 +26,8 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage>{
   HomeBloc? homeBloc;
+  WalletBloc walletBloc = WalletBloc();
+  AuthBloc authBloc = AuthBloc();
   final page = [
     const Home(),
     const CardPage(),
@@ -29,6 +37,9 @@ class _HomePageState extends State<HomePage>{
   void initState() {
     super.initState();
     homeBloc = BlocProvider.of<HomeBloc>(context);
+    walletBloc = BlocProvider.of<WalletBloc>(context);
+    authBloc = BlocProvider.of<AuthBloc>(context);
+    walletBloc.add(GetWalletEvent(authBloc.token ?? ""));
   }
   @override
   Widget build(BuildContext context) {
@@ -90,11 +101,29 @@ class Home extends StatefulWidget {
 class _HomeState extends State<Home> {
   HomeBloc homeBloc = HomeBloc();
   AccountBloc accountBloc = AccountBloc();
+  WalletBloc walletBloc = WalletBloc();
+  AuthBloc authBloc = AuthBloc();
+  TextEditingController confirmPassCtrl = TextEditingController();
+  FocusNode confirmPassFocusNode = FocusNode();
   @override
   void initState() {
     super.initState();
     homeBloc = BlocProvider.of<HomeBloc>(context);
     accountBloc = BlocProvider.of<AccountBloc>(context);
+    walletBloc = BlocProvider.of<WalletBloc>(context);
+    authBloc = BlocProvider.of<AuthBloc>(context);
+    walletBloc.stream.listen((newState) {
+      if (newState is GetWalletSuccessState) {
+        setState(() {});
+      } else if (newState is GetWalletSFailState) {
+        dialog(context, "Thông báo", newState.message, () {
+          Navigator.pop(context);
+        }, "Xác nhận");
+      } else if (newState is SetWalletPassState) {
+        dialogConfirmPass();
+        // Navigator.pushNamedAndRemoveUntil(context, Routes.walletPass, (route) => false);
+      }
+    });
   }
   @override
   Widget build(BuildContext context) {
@@ -120,7 +149,10 @@ class _HomeState extends State<Home> {
               Row(
                 children: [
                   Text("Xin chào,", style: TextStyle(fontSize: 14, fontWeight: FontWeight.w400, color: AppTheme.white),),
-                  Text(" Hà Anh Hùng", style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: AppTheme.white),)
+                  if (authBloc.customer!.name.isNotEmpty)
+                    Text(" ${authBloc.customer?.name}", style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: AppTheme.white),)
+                  else
+                    Text(" ...", style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: AppTheme.white),)
                 ],
               )
             ],
@@ -160,7 +192,7 @@ class _HomeState extends State<Home> {
                             children: [
                               Text("Số dư", style: TextStyle(fontSize: 18, fontWeight: FontWeight.w300, color: AppTheme.white),),
                               const SizedBox(height: 5,),
-                              Text("2.000.000", style: TextStyle(fontSize: 30, fontWeight: FontWeight.w600, color: AppTheme.white),)
+                              Text(walletBloc.wallet?.balance.toString() ?? "...", style: TextStyle(fontSize: 30, fontWeight: FontWeight.w600, color: AppTheme.white),)
                             ],
                           ),
                           // const SizedBox(height: 15,),
@@ -269,4 +301,69 @@ class _HomeState extends State<Home> {
     );
   }
 
+  void dialogConfirmPass() {
+    showDialog(
+        context: context,
+        useRootNavigator: false,
+        builder: (_) => GestureDetector(
+          onTap: () {
+            confirmPassFocusNode.unfocus();
+          },
+          child: Scaffold(
+            backgroundColor: Colors.transparent,
+            body: Center(
+              child: Container(
+                margin: const EdgeInsets.symmetric(horizontal: 30),
+                padding: const EdgeInsets.only(top: 20, bottom: 20, left: 20, right: 20),
+                decoration: BoxDecoration(
+                    color: AppTheme.white,
+                    borderRadius: BorderRadius.circular(10)
+                ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    DefaultTextStyle(
+                      child: Text("Xác nhận mật khẩu"), style: TextStyle(fontSize: 19, fontWeight: FontWeight.w500, color: AppTheme.black),),
+                    const SizedBox(height: 15,),
+                    DefaultTextStyle(
+                      child: Text("Bạn chưa thiết lập mật khẩu ví, xác nhận mật khẩu đăng nhập để thiết lập"), style: TextStyle(fontSize: 16, fontWeight: FontWeight.w400, color: AppTheme.black),textAlign: TextAlign.center,),
+                    const SizedBox(height: 30,),
+                    TextField(
+                      controller: confirmPassCtrl,
+                      obscureText: true,
+                      focusNode: confirmPassFocusNode,
+                      decoration: InputDecoration(
+                        isDense: true,
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10)
+                        ),
+                        hintText: "Mật khẩu"
+                      ),
+                      onChanged: (value) {
+                        setState(() {});
+                      },
+                    ),
+                    SizedBox(height: 30,),
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton(
+                        onPressed: () {
+                          if (authBloc.password.compareTo(confirmPassCtrl.text) == 0) {
+                            Navigator.pushNamedAndRemoveUntil(context, Routes.walletPass, (route) => false);
+                          } else {
+                            Fluttertoast.showToast(msg: "Mật khẩu không đúng", toastLength: Toast.LENGTH_LONG, gravity: ToastGravity.CENTER);
+                          }
+                        },
+                        style: ElevatedButton.styleFrom(primary: AppTheme.greenApp2, padding: const EdgeInsets.symmetric(vertical: 15)),
+                        child: Text("Xác nhận", style: const TextStyle(fontSize: 19, fontWeight: FontWeight.w500,),),
+                      ),
+                    )
+                  ],
+                ),
+              ),
+            ),
+          ),
+        )
+    );
+  }
 }
